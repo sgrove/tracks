@@ -32,7 +32,41 @@ class RecurringTodo < ActiveRecord::Base
   event :activate do
     transitions :to => :active, :from => [:completed]
   end
-  
+
+
+  # derived attributes
+
+  def project_name
+    project.try(:name)
+  end
+
+  def project_name=(pname)
+    pname.strip!
+
+    if pname == "None"
+      project = Project.null_object
+    else
+      project = current_user.projects.find_by_name(pname)
+      unless project
+        project = current_user.projects.create(:name => pname)
+        @new_project_created = true
+      end
+    end
+  end
+
+  def context_name
+    context.try(:name)
+  end
+
+  def context_name=(cname)
+    cname.strip!
+    context = current_user.contexts.find_by_name(cname)
+    unless context
+      context = current_user.contexts.create(:name => cname)
+      @new_context_created = true
+    end
+  end
+
   # the following recurrence patterns can be stored:
   #
   # daily todos - recurrence_period = 'daily'
@@ -67,6 +101,10 @@ class RecurringTodo < ActiveRecord::Base
       raise Exception.new, "unknown daily recurrence pattern: '#{selector}'"      
     end
   end
+
+  def daily_selector
+    'daily_every_x_day'
+  end
   
   def daily_every_x_days=(x)
     if recurring_period=='daily'
@@ -95,34 +133,17 @@ class RecurringTodo < ActiveRecord::Base
     self.every_day = self.every_day[0,position] + day + self.every_day[position+1,self.every_day.length]
   end
   
-  def weekly_return_monday=(selector)
-    switch_week_day(selector,1) if recurring_period=='weekly'
+  Date::DAYNAMES.map(&:downcase).each_with_index do |dayname, index|
+    day = (index+1)%7
+    define_method ("weekly_return_#{dayname}=").to_sym do |selector|
+      switch_week_day(selector,day) if recurring_period=='weekly'
+    end
+
+    define_method ("weekly_return_#{dayname}").to_sym do
+      Time.new.wday == day
+    end
   end
 
-  def weekly_return_tuesday=(selector)
-    switch_week_day(selector,2) if recurring_period=='weekly'
-  end
-  
-  def weekly_return_wednesday=(selector)
-    switch_week_day(selector,3) if recurring_period=='weekly'
-  end
-  
-  def weekly_return_thursday=(selector)
-    switch_week_day(selector,4) if recurring_period=='weekly'
-  end
-  
-  def weekly_return_friday=(selector)
-    switch_week_day(selector,5) if recurring_period=='weekly'
-  end
-
-  def weekly_return_saturday=(selector)
-    switch_week_day(selector,6) if recurring_period=='weekly'
-  end
-  
-  def weekly_return_sunday=(selector)
-    switch_week_day(selector,0) if recurring_period=='weekly'
-  end
-  
   def on_xday(n)
     unless self.every_day.nil?
       return self.every_day[n,1] == ' ' ? false : true
@@ -130,35 +151,13 @@ class RecurringTodo < ActiveRecord::Base
       return false
     end
   end
-  
-  def on_monday
-    return on_xday(1)
-  end
-  
-  def on_tuesday
-    return on_xday(2)
-  end
-  
-  def on_wednesday
-    return on_xday(3)
-  end
-  
-  def on_thursday
-    return on_xday(4)
-  end
-  
-  def on_friday
-    return on_xday(5)
-  end
-  
-  def on_saturday
-    return on_xday(6)
-  end
-  
-  def on_sunday
-    return on_xday(0)
-  end
 
+  Date::DAYNAMES.map(&:downcase).each_with_index do |dayname, index|
+    define_method "on_#{dayname}" do
+      on_xday((index+1)%7)
+    end
+  end
+  
   # MONTHLY
   
   def monthly_selector=(selector)
