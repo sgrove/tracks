@@ -13,6 +13,7 @@ class RecurringTodosController < ApplicationController
     @no_recurring_todos = @recurring_todos.size == 0
     @no_completed_recurring_todos = @completed_recurring_todos.size == 0
     @count = @recurring_todos.size 
+    @recurring_todo = RecurringTodo.new
     
     @page_title = "TRACKS::Recurring Actions"
   end
