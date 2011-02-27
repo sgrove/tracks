@@ -21,15 +21,6 @@ Rails::Initializer.run do |config|
   # config.frameworks -= [ :action_web_service, :action_mailer ]
   config.autoload_paths += %W( #{RAILS_ROOT}/app/apis )
 
-  config.gem "highline"
-  config.gem "RedCloth"
-  config.gem "soap4r", :lib => false
-  config.gem 'datanoise-actionwebservice', :lib => 'actionwebservice'
-  config.gem 'sanitize'
-  config.gem 'rack', :version => '1.1.0'
-  config.gem 'will_paginate', :version => '~> 2.3.15'
-  config.gem 'has_many_polymorphs'
-
   config.action_controller.use_accept_header = true
 
   # Use the database for sessions instead of the file system
@@ -71,10 +62,6 @@ Rails::Initializer.run do |config|
   # config.i18n.default_locale = :de
   
   # See Rails::Configuration for more options
-  if ( SITE_CONFIG['authentication_schemes'].include? 'cas')
-    #requires rubycas-client gem to be installed
-    config.gem "rubycas-client", :lib => 'casclient'
-  end
 end
 
 # Add new inflection rules using the following format
