@@ -1,6 +1,6 @@
 source "http://rubygems.org"
 
-gem 'rails', '2.3.11', :path => 'vendor/rails/railties'
+gem 'rails', '2.3.11'
 gem 'datanoise-actionwebservice', '2.3.2', :path => 'vendor/gems/datanoise-actionwebservice-2.3.2'
 gem 'highline', '1.5.0', :path => 'vendor/gems/highline-1.5.0'
 gem 'soap4r', '1.5.8', :path => 'vendor/gems/soap4r-1.5.8'
@@ -37,3 +37,11 @@ group :selenium do
   gem 'selenium-client',  :require => false
   gem 'mongrel'  # required by webrat for selenium
 end
+
+
+gem 'pg', '>=0.10.0'
+
+
+
+gem 'thin', '>=1.2.7'
+
